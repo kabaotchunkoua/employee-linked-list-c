@@ -25,7 +25,7 @@
 
 /* Employee structure */
 typedef struct Employee {
-    char name[MAX_NAME];
+    char name[MAX_NAME]; 
     int id;
     char manager[MAX_MANAGER];   // direct manager's name
     int rank;                    // hierarchy level: 1 = highest (CEO)
@@ -33,7 +33,7 @@ typedef struct Employee {
 } Employee;
 
 /* Global list head */
-Employee* head = NULL;
+Employee* head = NULL; 
 // The Main method is by loop calls functions via menu selection.
 int main()
 {
