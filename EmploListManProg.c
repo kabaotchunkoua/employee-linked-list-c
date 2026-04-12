@@ -89,8 +89,36 @@ int compute_rank(const char* manager){
 }
 
 /*=================== List of functions ========================*/
-void insert_employee(const char* manager);
-void delete_employee();
+void insert_employee(const char* name, int id, const char* manager){
+Employee* newemp = create_employee(name, id, manager);
+
+if(newemp = NULL){
+printf("Memory allocation failed\n");
+return;
+}
+
+//Insert at the beginning of the list
+newemp->next = head;
+head = newemp;
+}
+
+void delete_employee(int id){
+employee* temp = head;
+employee* prev = NULL;
+while(temp !=NULL && temp->id != id){
+prev = temp;
+temp = temp->next;
+}
+if(temp == NULL){
+printf("Employee not found.\n");
+return;
+}
+// Remove the employee 
+prev->next = temp->next;
+free(temp);
+printf("Employee deleted.\n");
+}
+
 void display_employees();
 void search_employees();
 void update_employee();
