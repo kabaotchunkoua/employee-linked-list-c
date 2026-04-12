@@ -119,6 +119,7 @@ int main()
     int choice, id, index;
     char name[MAX_NAME], manager[MAX_MANAGER];
     
-    Employee* secondlist = NUll;
+    Employee* secondlist = NULL;
    
 }
+//
