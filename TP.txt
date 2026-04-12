@@ -1,0 +1,54 @@
+15)
+Cette fonction permet de rechercher un employé par son identifiant (id) et de mettre à jour son nom et son manager.
+
+void update_employee(int id, char* name, char* manager) {
+    Employee* temp = head;
+
+    while (temp != NULL) {
+        if (temp->id == id) {
+            strcpy(temp->name, name);
+            strcpy(temp->manager, manager);
+            printf("Employé mis à jour avec succès.\n");
+            return;
+        }
+        temp = temp->next;
+    }
+    printf("Employé avec l'ID %d introuvable.\n", id);
+} 
+sort_employees_by_name()
+16)
+Cette fonction permet de trier les employés par ordre alphabétique selon leur nom (en utilisant le tri à bulles).
+
+void sort_employees_by_name() {
+    if (head == NULL || head->next == NULL) {
+        return;
+    }
+    int swapped;
+    Employee *ptr1;
+    Employee *lptr = NULL;
+    do {
+        swapped = 0;
+        ptr1 = head;
+        while (ptr1->next != lptr) {
+            if (strcmp(ptr1->name, ptr1->next->name) > 0) {
+                // Échange des données
+                int tempId;
+                char tempName[50];
+                char tempManager[50];
+                tempId = ptr1->id;
+                strcpy(tempName, ptr1->name);
+                strcpy(tempManager, ptr1->manager);
+                ptr1->id = ptr1->next->id;
+                strcpy(ptr1->name, ptr1->next->name);
+                strcpy(ptr1->manager, ptr1->next->manager);
+                ptr1->next->id = tempId;
+               strcpy(ptr1->next->name, tempName);
+        strcpy(ptr1->next->manager, tempManager);
+                swapped = 1;
+            }
+            ptr1 = ptr1->next;
+        }
+        lptr = ptr1;
+    } while (swapped);
+    printf("Employés triés par nom.\n");
+}
