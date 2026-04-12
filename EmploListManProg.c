@@ -88,10 +88,37 @@ int compute_rank(const char* manager){
     return 1; 
 }
 
+/*=================== List of functions ========================*/
+void insert_employee(const char* manager);
+void delete_employee();
+void display_employees();
+void search_employees();
+void update_employee();
+void sort_employees_by_name();
+void sort_employees_by_id();
+void sort_employees_by_rank();
+void merge_employees();
+int  compare_employees();
+int  count_employees();
+int  is_employee_list_empty();
+void delete_employee_list();
+char* get_employee_name();
+int  get_employee_id();
+void search_by_name();
+void search_by_index();
+void revers_list();
+int  verify_list();
+
+
+
 
 
 // The Main method is by loop calls functions via menu selection.
 int main()
 {
-
+    int choice, id, index;
+    char name[MAX_NAME], manager[MAX_MANAGER];
+    
+    Employee* secondlist = NUll;
+   
 }
