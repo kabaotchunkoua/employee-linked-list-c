@@ -263,7 +263,7 @@ void sort_employees_by_rank() {
                 ptr1->next->rank = tempRank;
                 swapped = 1;
             }
-            ptr1 = ptr1->next;
+            ptr1 = ptr1->next; 
         } 
         lptr = ptr1;
     } while (swapped);
