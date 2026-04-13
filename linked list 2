@@ -12,7 +12,7 @@ typedef struct Employee {
     char manager[MAX_MANAGER];   // direct manager's name
     int rank;                    // hierarchy level: 1 = highest (CEO)
     struct Employee* next;
-} Employee;
+} Employee; 
 
 /* Global list head */
 Employee* head = NULL; 
