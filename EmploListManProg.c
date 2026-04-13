@@ -21,7 +21,7 @@
 #include <string.h>
 
 #define MAX_NAME 50
-#define MAX_MANAGER 50
+#define MAX_MANAGER 5
 
 /* Employee structure */
 typedef struct Employee {
@@ -264,7 +264,7 @@ void sort_employees_by_rank() {
                 swapped = 1;
             }
             ptr1 = ptr1->next;
-        }
+        } 
         lptr = ptr1;
     } while (swapped);
     printf("List sorted by rank (ascending).\n");
