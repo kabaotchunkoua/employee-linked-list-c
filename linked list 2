@@ -1,0 +1,570 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_NAME 50
+#define MAX_MANAGER 50
+
+/* Employee structure */
+typedef struct Employee {
+    char name[MAX_NAME]; 
+    int id;
+    char manager[MAX_MANAGER];   // direct manager's name
+    int rank;                    // hierarchy level: 1 = highest (CEO)
+    struct Employee* next;
+} Employee;
+
+/* Global list head */
+Employee* head = NULL; 
+
+Employee *create_employee(const char*name, int id, const char* manager, int rank){
+    Employee* newEmpl = malloc(sizeof(Employee));
+
+        if (!newEmpl){
+            printf("Memory allocation failed\n");
+            exit(1);
+        }
+        strcpy(newEmpl->name, name);
+        newEmpl->id = id;
+        strcpy(newEmpl->manager, manager);
+        newEmpl->rank = rank;
+        newEmpl->next =NULL;
+        return newEmpl;
+
+
+}
+
+int id_exists(int id){
+    Employee * temp = head;
+    while(temp){
+        if (temp->id == id ) return 1;
+        temp = temp->next;
+
+    }
+    return 0;
+}
+
+Employee *find_by_name(const char* name){
+    Employee *tmep= head;
+    while(tmep){
+        if(strcmp(tmep->name, name) == 0) return tmep;
+        tmep = tmep->next;
+    }
+    return NULL;
+}
+Employee *find_by_id(int id){
+    Employee *temp = head;
+    while(temp){
+        if(temp -> id == id) return temp;
+        temp = temp->next;
+    }
+    return NULL;
+}
+
+// to the comput the rank based on manager name
+int compute_rank(const char* manager){
+    if(manager == NULL || strlen(manager) == 0) return 1;
+    Employee* mngr = find_by_name(manager);
+    if(mngr) return mngr->rank +1;
+    printf("Warning: Manager '%s' not found. Setting rank = 1. \n", manager);
+    return 1; 
+}
+
+/*=================== List of functions ========================*/
+void insert_employee(const char* name, int id, const char* manager){
+    if (id_exists(id)) {
+        printf("Error: Employee with ID %d already exists.\n", id);
+        return;
+    }
+int rank = compute_rank(manager);
+Employee* newemp = create_employee(name, id, manager, rank);
+
+if (newemp == NULL){
+printf("Memory allocation failed\n");
+return;
+}
+
+//Insert at the beginning of the list
+newemp->next = head;
+head = newemp;
+}
+
+void delete_employee(int id){
+Employee* temp = head;
+Employee* prev = NULL;
+while(temp !=NULL && temp->id != id){
+prev = temp;
+temp = temp->next;
+}
+if(temp == NULL){
+printf("Employee not found.\n");
+return;
+}
+// Remove the employee 
+prev->next = temp->next;
+free(temp);
+printf("Employee deleted.\n");
+}
+
+/* 3. Display all employees */
+void display_employees() {
+    if (head == NULL) {
+        printf("No employees to display.\n");
+        return;
+    }
+    printf("\n%-20s %-10s %-20s %-5s\n", "Name", "ID", "Manager", "Rank");
+    printf("--------------------------------------------------------\n");
+    Employee* temp = head;
+    while (temp) {
+        printf("%-20s %-10d %-20s %-5d\n", temp->name, temp->id, temp->manager, temp->rank);
+        temp = temp->next;
+    }
+    printf("\n");
+}
+
+/* 4. Search employee by ID */
+void search_employee(int id) {
+    Employee* emp = find_by_id(id);
+    if (emp) {
+        printf("Found: Name=%s, ID=%d, Manager=%s, Rank=%d\n", emp->name, emp->id, emp->manager, emp->rank);
+    } else {
+        printf("Employee with ID %d not found.\n", id);
+    }
+}
+
+/* 5. Update employee (name and manager) */
+void update_employee(int id, char* new_name, char* new_manager) {
+    Employee* emp = find_by_id(id);
+    if (!emp) {
+        printf("Employee with ID %d not found.\n", id);
+        return;
+    }
+    strcpy(emp->name, new_name);
+    strcpy(emp->manager, new_manager);
+    emp->rank = compute_rank(new_manager);
+    printf("Employee ID %d updated. New name: %s, Manager: %s, Rank: %d\n", id, new_name, new_manager, emp->rank);
+}
+
+/* 6. Sort employees by name (alphabetical) */
+void sort_employees_by_name() {
+    if (head == NULL || head->next == NULL) return;
+    int swapped;
+    Employee* ptr1;
+    Employee* lptr = NULL;
+    do {
+        swapped = 0;
+        ptr1 = head;
+        while (ptr1->next != lptr) {
+            if (strcmp(ptr1->name, ptr1->next->name) > 0) {
+                // swap data
+                char tempName[MAX_NAME];
+                int tempId, tempRank;
+                char tempManager[MAX_MANAGER];
+                strcpy(tempName, ptr1->name);
+                strcpy(ptr1->name, ptr1->next->name);
+                strcpy(ptr1->next->name, tempName);
+                tempId = ptr1->id;
+                ptr1->id = ptr1->next->id;
+                ptr1->next->id = tempId;
+                strcpy(tempManager, ptr1->manager);
+                strcpy(ptr1->manager, ptr1->next->manager);
+                strcpy(ptr1->next->manager, tempManager);
+                tempRank = ptr1->rank;
+                ptr1->rank = ptr1->next->rank;
+                ptr1->next->rank = tempRank;
+                swapped = 1;
+            }
+            ptr1 = ptr1->next;
+        }
+        lptr = ptr1;
+    } while (swapped);
+    printf("List sorted by name.\n");
+}
+
+/* 7. Sort employees by ID */
+void sort_employees_by_id() {
+    if (head == NULL || head->next == NULL) return;
+    int swapped;
+    Employee* ptr1;
+    Employee* lptr = NULL;
+    do {
+        swapped = 0;
+        ptr1 = head;
+        while (ptr1->next != lptr) {
+            if (ptr1->id > ptr1->next->id) {
+                // swap data
+                char tempName[MAX_NAME];
+                int tempId, tempRank;
+                char tempManager[MAX_MANAGER];
+                strcpy(tempName, ptr1->name);
+                strcpy(ptr1->name, ptr1->next->name);
+                strcpy(ptr1->next->name, tempName);
+                tempId = ptr1->id;
+                ptr1->id = ptr1->next->id;
+                ptr1->next->id = tempId;
+                strcpy(tempManager, ptr1->manager);
+                strcpy(ptr1->manager, ptr1->next->manager);
+                strcpy(ptr1->next->manager, tempManager);
+                tempRank = ptr1->rank;
+                ptr1->rank = ptr1->next->rank;
+                ptr1->next->rank = tempRank;
+                swapped = 1;
+            }
+            ptr1 = ptr1->next;
+        }
+        lptr = ptr1;
+    } while (swapped);
+    printf("List sorted by ID.\n");
+}
+
+/* Sort by rank (ascending: 1 highest) */
+void sort_employees_by_rank() {
+    if (head == NULL || head->next == NULL) return;
+    int swapped;
+    Employee* ptr1;
+    Employee* lptr = NULL;
+    do {
+        swapped = 0;
+        ptr1 = head;
+        while (ptr1->next != lptr) {
+            if (ptr1->rank > ptr1->next->rank) {
+                char tempName[MAX_NAME];
+                int tempId, tempRank;
+                char tempManager[MAX_MANAGER];
+                strcpy(tempName, ptr1->name);
+                strcpy(ptr1->name, ptr1->next->name);
+                strcpy(ptr1->next->name, tempName);
+                tempId = ptr1->id;
+                ptr1->id = ptr1->next->id;
+                ptr1->next->id = tempId;
+                strcpy(tempManager, ptr1->manager);
+                strcpy(ptr1->manager, ptr1->next->manager);
+                strcpy(ptr1->next->manager, tempManager);
+                tempRank = ptr1->rank;
+                ptr1->rank = ptr1->next->rank;
+                ptr1->next->rank = tempRank;
+                swapped = 1;
+            }
+            ptr1 = ptr1->next;
+        }
+        lptr = ptr1;
+    } while (swapped);
+    printf("List sorted by rank (ascending).\n");
+}
+
+/* 8. Merge another list into current list (avoid duplicates by ID) */
+void merge_employees(Employee* list2_head) {
+    Employee* temp = list2_head;
+    while (temp) {
+        if (!id_exists(temp->id)) {
+            Employee* newEmp = create_employee(temp->name, temp->id, temp->manager, temp->rank);
+            // append
+            if (head == NULL) head = newEmp;
+            else {
+                Employee* last = head;
+                while (last->next) last = last->next;
+                last->next = newEmp;
+            }
+        } else {
+            printf("Skipped duplicate ID %d (%s)\n", temp->id, temp->name);
+        }
+        temp = temp->next;
+    }
+    printf("Merge completed.\n");
+}
+
+/* 9. Compare hierarchy with another list (based on average rank) */
+int compare_employees(Employee* list2_head) {
+    if (head == NULL && list2_head == NULL) return 0;
+    int totalRank1 = 0, totalRank2 = 0;
+    int count1 = 0, count2 = 0;
+    Employee* t = head;
+    while (t) { totalRank1 += t->rank; count1++; t = t->next; }
+    t = list2_head;
+    while (t) { totalRank2 += t->rank; count2++; t = t->next; }
+    double avg1 = (count1 == 0) ? 0 : (double)totalRank1 / count1;
+    double avg2 = (count2 == 0) ? 0 : (double)totalRank2 / count2;
+    if (avg1 < avg2) return 1;   // current list has higher hierarchy (lower rank number)
+    else if (avg1 > avg2) return -1;
+    else return 0;
+}
+
+/* 10. Count employees */
+int count_employees() {
+    int cnt = 0;
+    Employee* temp = head;
+    while (temp) { cnt++; temp = temp->next; }
+    return cnt;
+}
+
+/* 11. Check if list empty */
+int is_employee_list_empty() {
+    return head == NULL;
+}
+
+/* 12. Delete entire list */
+void delete_employee_list() {
+    Employee* temp;
+    while (head) {
+        temp = head;
+        head = head->next;
+        free(temp);
+    }
+    printf("All employees deleted.\n");
+}
+
+/* 13. Get manager name of an employee by ID */
+char* get_employee_manager(int id) {
+    Employee* emp = find_by_id(id);
+    if (emp) return emp->manager;
+    return NULL;
+}
+
+/* 14. Get name of employee by ID */
+char* get_employee_name(int id) {
+    Employee* emp = find_by_id(id);
+    if (emp) return emp->name;
+    return NULL;
+}
+
+/* 15. Get employee ID by index (0‑based) – the requested function name is kept,
+       but it returns the ID at given index; if index is invalid, returns -1 */
+int get_employee_id(int index) {
+    Employee* temp = head;
+    int i = 0;
+    while (temp) {
+        if (i == index) return temp->id;
+        i++;
+        temp = temp->next;
+    }
+    return -1;
+}
+
+/* Additional search functions: by name and by index */
+void search_by_name(char* name) {
+    Employee* emp = find_by_name(name);
+    if (emp) {
+        printf("Found: Name=%s, ID=%d, Manager=%s, Rank=%d\n", emp->name, emp->id, emp->manager, emp->rank);
+    } else {
+        printf("Employee with name '%s' not found.\n", name);
+    }
+}
+
+void search_by_index(int index) {
+    Employee* temp = head;
+    int i = 0;
+    while (temp) {
+        if (i == index) {
+            printf("At index %d: Name=%s, ID=%d, Manager=%s, Rank=%d\n", index, temp->name, temp->id, temp->manager, temp->rank);
+            return;
+        }
+        i++;
+        temp = temp->next;
+    }
+    printf("Index %d out of range.\n", index);
+}
+
+/* Inversion: reverse the linked list */
+void reverse_list() {
+    Employee* prev = NULL;
+    Employee* curr = head;
+    Employee* next = NULL;
+    while (curr) {
+        next = curr->next;
+        curr->next = prev;
+        prev = curr;
+        curr = next;
+    }
+    head = prev;
+    printf("List reversed.\n");
+}
+
+/* Verification: check for duplicate IDs and valid manager references */
+int verify_list() {
+    if (head == NULL) return 1;
+    Employee* outer = head;
+    while (outer) {
+        // duplicate check
+        Employee* inner = outer->next;
+        while (inner) {
+            if (outer->id == inner->id) {
+                printf("Verification failed: duplicate ID %d (%s and %s)\n", outer->id, outer->name, inner->name);
+                return 0;
+            }
+            inner = inner->next;
+        }
+        // manager existence check (if manager not empty and not self)
+        if (strlen(outer->manager) > 0 && strcmp(outer->name, outer->manager) != 0) {
+            if (!find_by_name(outer->manager)) {
+                printf("Verification warning: manager '%s' for employee '%s' does not exist.\n", outer->manager, outer->name);
+                // not a failure, just warning
+            }
+        }
+        outer = outer->next;
+    }
+    printf("Verification passed (no duplicate IDs).\n");
+    return 1;
+}
+
+
+
+/* ================== MENU & MAIN ================== */
+void print_menu() {
+    printf("\n========================================\n");
+    printf("\n======= EMPLOYEE MANAGEMENT MENU =======\n");
+    printf("\n========================================\n");
+
+    printf("1. Insert employee\n");
+    printf("2. Delete employee by ID\n");
+    printf("3. Display all employees\n");
+    printf("4. Search by ID\n");
+    printf("5. Search by name\n");
+    printf("6. Search by index\n");
+    printf("7. Update employee\n");
+    printf("8. Sort by name\n");
+    printf("9. Sort by ID\n");
+    printf("10. Sort by rank\n");
+    printf("11. Reverse list (inversion)\n");
+    printf("12. Merge another list (predefined)\n");
+    printf("13. Compare hierarchy with another list\n");
+    printf("14. Count employees\n");
+    printf("15. Check if empty\n");
+    printf("16. Delete all employees\n");
+    printf("17. Get manager by ID\n");
+    printf("18. Get name by ID\n");
+    printf("19. Get ID by index\n");
+    printf("20. Verify list\n");
+    printf("0. Exit\n");
+     printf("\n========================================\n");
+    printf("Choice: ");
+
+}
+
+
+
+
+// The Main method is by loop calls functions via menu selection.
+int main()
+{
+    int choice, id, index;
+    char name[MAX_NAME], manager[MAX_MANAGER];
+
+    Employee* secondList = NULL;
+    Employee* e1 = create_employee("kabao", 203, "bob", 2);
+    Employee* e2 = create_employee("Danie", 204, "bob", 2);
+    e1->next =e2;
+    secondList =e1;
+
+    do {
+        print_menu();
+        scanf("%d", &choice);
+        getchar();
+
+        switch (choice) {
+            case 1:
+            printf("Enter name: "); fgets(name, MAX_NAME, stdin); name[strcspn(name,"\n" )] = 0;
+            printf("Enter ID: ");scanf("%d", &id); getchar();
+            printf("Enter manager name: "); fgets( manager, MAX_MANAGER, stdin); manager[strcspn(manager,"\n")] =0;
+            insert_employee(name,id, manager);
+            break;
+            case2:
+            printf("Enter ID to Delet: "); scanf("%d", &id);
+            delete_employee(id);
+            break;
+            case 3:
+            display_employees();
+            break;
+            case 4:
+                printf("Enter ID: "); scanf("%d", &id);
+                search_employee(id);
+                break;
+            case 5:
+                printf("Enter name: "); fgets(name, MAX_NAME, stdin); name[strcspn(name, "\n")] = 0;
+                search_by_name(name);
+                break;
+            case 6:
+                printf("Enter index (0-based): "); scanf("%d", &index);
+                search_by_index(index);
+                break;
+            case 7:
+                printf("Enter ID to update: "); scanf("%d", &id); getchar();
+                printf("New name: "); fgets(name, MAX_NAME, stdin); name[strcspn(name, "\n")] = 0;
+                printf("New manager: "); fgets(manager, MAX_MANAGER, stdin); manager[strcspn(manager, "\n")] = 0;
+                update_employee(id, name, manager);
+                break;
+            case 8:
+                sort_employees_by_name();
+                break;
+            case 9:
+                sort_employees_by_id();
+                break;
+            case 10:
+                sort_employees_by_rank();
+                break;
+            case 11:
+                reverse_list();
+                break;
+            case 12:
+                printf("Merging a predefined second list (Alice,Charlie) into current...\n");
+                merge_employees(secondList);
+                break;
+            case 13: {
+                int cmp = compare_employees(secondList);
+                printf("Comparison result: ");
+                if (cmp == 1) printf("Current list has higher hierarchy (lower average rank).\n");
+                else if (cmp == -1) printf("Current list has lower hierarchy (higher average rank).\n");
+                else printf("Both lists have equal average hierarchy.\n");
+                break;
+            }
+            case 14:
+                printf("Total employees: %d\n", count_employees());
+                break;
+            case 15:
+                printf(is_employee_list_empty() ? "List is empty.\n" : "List is not empty.\n");
+                break;
+            case 16:
+                delete_employee_list();
+                break;
+            case 17:
+                printf("Enter employee ID: "); scanf("%d", &id);
+                {
+                    char* mgr = get_employee_manager(id);
+                    if (mgr) printf("Manager of ID %d: %s\n", id, mgr);
+                    else printf("Employee not found.\n");
+                }
+                break;
+            case 18:
+                printf("Enter employee ID: "); scanf("%d", &id);
+                {
+                    char* nm = get_employee_name(id);
+                    if (nm) printf("Name of ID %d: %s\n", id, nm);
+                    else printf("Employee not found.\n");
+                }
+                break;
+            case 19:
+                printf("Enter index: "); scanf("%d", &index);
+                id = get_employee_id(index);
+                if (id != -1) printf("ID at index %d: %d\n", index, id);
+                else printf("Invalid index.\n");
+                break;
+            case 20:
+                verify_list();
+                break;
+            case 0:
+                printf("Exiting...\n");
+                break;
+            default:
+                printf("Invalid choice.\n");
+        }
+    } while (choice != 0);
+
+    // Free memory
+    delete_employee_list();
+    // Free second list
+    while (secondList) {
+        Employee* tmp = secondList;
+        secondList = secondList->next;
+        free(tmp);
+    }
+    return 0;
+}
